@@ -1,8 +1,6 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-import Navigation from './core/Navigation'
-import { AppBar, IconButton, Toolbar } from '@material-ui/core'
-import MenuIcon from '@material-ui/icons/Menu'
+import Main from '../components/Main'
 
 const getPokemon = async () => {
 	const url = 'https://pokeapi.co/api/v2/pokemon/'
@@ -25,25 +23,10 @@ class Home extends Component {
 		const pokemon = getPokemon()
 	}
 
-	toggleMenu = () =>
-		this.setState({
-			open: !this.state.open
-		})
+	toggleMenu = () => this.setNavDrawer(!this.state.open)
 
 	render() {
-		return (
-			<>
-				<AppBar position="static">
-					<Toolbar>
-						<IconButton color="inherit" aria-label="Menu" onClick={this.toggleMenu}>
-							<MenuIcon />
-						</IconButton>
-					</Toolbar>
-				</AppBar>
-				<Navigation isOpen={this.state.open} handleClick={() => this.setNavDrawer(false)} />
-				<div>Welcome to next.js!</div>
-			</>
-		)
+		return <Main />
 	}
 }
 
