@@ -11,23 +11,47 @@ class PokemonList extends Component {
 		pokemon: []
 	}
 
+	getPokemonData = pokemon => {
+		return Promise.all(pokemon.map(poke => axios.get(`${baseUrl}/pokemon/${poke.pokemon_species.name}`)))
+	}
+
+	queueCalls = async arr => {
+		const next = arr.pop()
+		await this.getPokemonData(next).then(result => {
+			this.setState({
+				isLoading: false,
+				pokemon: [...this.state.pokemon, ...result]
+			})
+		})
+
+		if (arr.length) {
+			this.queueCalls(arr)
+		}
+	}
+
 	componentDidMount() {
 		axios.get(`${baseUrl}/pokedex/2`).then(async result => {
 			const { pokemon_entries } = result.data
-			const pokes = pokemon_entries.map(poke => axios.get(`${baseUrl}/pokemon/${poke.pokemon_species.name}`))
-			const individualResults = await Promise.all(pokes)
 
-			console.log(individualResults)
-			this.setState({
-				isLoading: false,
-				pokemon: individualResults
-			})
+			const numberOfGroups = Math.floor(pokemon_entries.length / 20 + 1)
+			const pokemonGroups = []
+
+			for (let i = 0; i <= numberOfGroups; i++) {
+				pokemonGroups.push(pokemon_entries.slice(20 * i, 20 * (i + 1)))
+			}
+
+			console.log(pokemonGroups)
+
+			const sortedGroups = pokemonGroups.reverse()
+
+			this.queueCalls(sortedGroups)
 		})
 	}
 
 	render() {
 		const { isLoading, pokemon } = this.state
-		return isLoading ? <Loading /> : pokemon.map(poke => <PokemonListItem key={poke.id} pokemon={poke.data} />)
+		console.log('pokemon in render: ', pokemon)
+		return isLoading ? <Loading /> : pokemon.map(poke => <PokemonListItem key={poke.data.id} pokemon={poke.data} />)
 	}
 }
 
